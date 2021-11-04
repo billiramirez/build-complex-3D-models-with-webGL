@@ -11,7 +11,6 @@ draw();
 
 function initGL() {
   var canvas = document.getElementById("canvas");
-  console.log(canvas);
   gl = canvas.getContext("webgl");
   gl.enable(gl.DEPTH_TEST);
   gl.viewport(0, 0, canvas.width, canvas.height);
@@ -98,8 +97,16 @@ function createVertices() {
   var pointSize = gl.getAttribLocation(shaderProgram, "pointSize");
   gl.vertexAttrib1f(pointSize, 20);
 
-  //   var color = gl.getUniformLocation(shaderProgram, "color");
-  //   gl.uniform4f(color, 0, 0, 0, 1);
+  var perspectiveMatrix = mat4.create();
+  mat4.perspective(perspectiveMatrix, 1, canvas.width / canvas.height, 0.1, 11);
+
+  var perspectiveLoc = gl.getUniformLocation(
+    shaderProgram,
+    "perspectiveMatrix"
+  );
+  gl.uniformMatrix4fv(perspectiveLoc, false, perspectiveMatrix);
+
+  mat4.translate(matrix, matrix, [0, 0, -2]);
 }
 
 function draw() {
