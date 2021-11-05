@@ -14,7 +14,7 @@ function initGL() {
   gl = canvas.getContext("webgl");
   gl.enable(gl.DEPTH_TEST);
   gl.viewport(0, 0, canvas.width, canvas.height);
-  gl.clearColor(1, 1, 1, 1);
+  gl.clearColor(0, 0, 0.6, 1);
 }
 
 function createShaders() {
@@ -30,23 +30,24 @@ function createShaders() {
 
 function createVertices() {
   vertices = [];
-  for (var i = 0; i < 2; i += 0.01) {
-    vertices.push(i - 1);
-    vertices.push(-0.3);
-    vertices.push(Math.sin(i * 10) * 0.2);
-    vertices.push(i / 2);
-    vertices.push(0);
-    vertices.push(1 - i / 2);
-    vertices.push(1);
-
-    vertices.push(i - 1);
-    vertices.push(+0.3);
-    vertices.push(Math.sin(i * 10) * 0.2);
-    vertices.push(0);
-    vertices.push(1 - i / 2);
-    vertices.push(i / 2);
+  vertices.push(0, 0.9, 0.3, 1, 1, 1, 1);
+  for (var i = 0; i < Math.PI * 2; i += 0.01) {
+    vertices.push(Math.cos(i));
+    vertices.push(Math.sin(i));
+    vertices.push(Math.sin(i * 10) * 0.1);
+    vertices.push(Math.sin(i * 10) * 0.5 + 0.5);
+    vertices.push(Math.sin(i * 8) * 0.5 + 0.5);
+    vertices.push(Math.sin(i * 12) * 0.5 + 0.5);
     vertices.push(1);
   }
+  i = Math.PI * 2;
+  vertices.push(Math.cos(i));
+  vertices.push(Math.sin(i));
+  vertices.push(Math.sin(i * 10) * 0.2);
+  vertices.push(Math.sin(i * 10) * 0.5 + 0.5);
+  vertices.push(Math.sin(i * 7) * 0.5 + 0.5);
+  vertices.push(1 - Math.sin(i * 12) * 0.5 + 0.5);
+  vertices.push(1);
 
   vertexCount = vertices.length / 7;
 
@@ -74,15 +75,18 @@ function createVertices() {
     Float32Array.BYTES_PER_ELEMENT * 7,
     Float32Array.BYTES_PER_ELEMENT * 3
   );
+
   gl.enableVertexAttribArray(colorsLocation);
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
   var pointSize = gl.getAttribLocation(shaderProgram, "pointSize");
   gl.vertexAttrib1f(pointSize, 20);
 
+  //   var color = gl.getUniformLocation(shaderProgram, "color");
+  //   gl.uniform4f(color, 0, 0, 0, 1);
+
   var perspectiveMatrix = mat4.create();
   mat4.perspective(perspectiveMatrix, 1, canvas.width / canvas.height, 0.1, 11);
-
   var perspectiveLoc = gl.getUniformLocation(
     shaderProgram,
     "perspectiveMatrix"
@@ -101,7 +105,7 @@ function draw() {
   gl.uniformMatrix4fv(transformMatrix, false, matrix);
 
   gl.clear(gl.COLOR_BUFFER_BIT);
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertexCount);
+  gl.drawArrays(gl.TRIANGLE_FAN, 0, vertexCount);
   requestAnimationFrame(draw);
 }
 
