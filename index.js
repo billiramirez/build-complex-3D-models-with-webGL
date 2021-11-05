@@ -2,11 +2,13 @@ var gl,
   shaderProgram,
   vertices,
   matrix = mat4.create(),
-  vertexCount;
+  vertexCount,
+  indexCount;
 
 initGL();
 createShaders();
 createVertices();
+createIndices();
 draw();
 
 function initGL() {
@@ -14,7 +16,7 @@ function initGL() {
   gl = canvas.getContext("webgl");
   gl.enable(gl.DEPTH_TEST);
   gl.viewport(0, 0, canvas.width, canvas.height);
-  gl.clearColor(0, 0, 0.6, 1);
+  gl.clearColor(1, 1, 1, 1);
 }
 
 function createShaders() {
@@ -29,25 +31,64 @@ function createShaders() {
 }
 
 function createVertices() {
-  vertices = [];
-  vertices.push(0, 0.9, 0.3, 1, 1, 1, 1);
-  for (var i = 0; i < Math.PI * 2; i += 0.01) {
-    vertices.push(Math.cos(i));
-    vertices.push(Math.sin(i));
-    vertices.push(Math.sin(i * 10) * 0.1);
-    vertices.push(Math.sin(i * 10) * 0.5 + 0.5);
-    vertices.push(Math.sin(i * 8) * 0.5 + 0.5);
-    vertices.push(Math.sin(i * 12) * 0.5 + 0.5);
-    vertices.push(1);
-  }
-  i = Math.PI * 2;
-  vertices.push(Math.cos(i));
-  vertices.push(Math.sin(i));
-  vertices.push(Math.sin(i * 10) * 0.2);
-  vertices.push(Math.sin(i * 10) * 0.5 + 0.5);
-  vertices.push(Math.sin(i * 7) * 0.5 + 0.5);
-  vertices.push(1 - Math.sin(i * 12) * 0.5 + 0.5);
-  vertices.push(1);
+  vertices = [
+    -1,
+    -1,
+    -1,
+    1,
+    0,
+    0,
+    1, // 0
+    1,
+    -1,
+    -1,
+    1,
+    1,
+    0,
+    1, // 1
+    -1,
+    1,
+    -1,
+    0,
+    1,
+    1,
+    1, // 2
+    1,
+    1,
+    -1,
+    0,
+    0,
+    1,
+    1, // 3
+    -1,
+    1,
+    1,
+    1,
+    0.5,
+    0,
+    1, // 4
+    1,
+    1,
+    1,
+    0.5,
+    1,
+    1,
+    1, // 5
+    -1,
+    -1,
+    1,
+    1,
+    0,
+    0.5,
+    1, // 6
+    1,
+    -1,
+    1,
+    0.5,
+    0,
+    1,
+    1, // 7
+  ];
 
   vertexCount = vertices.length / 7;
 
@@ -93,7 +134,23 @@ function createVertices() {
   );
   gl.uniformMatrix4fv(perspectiveLoc, false, perspectiveMatrix);
 
-  mat4.translate(matrix, matrix, [0, 0, -2]);
+  mat4.translate(matrix, matrix, [0, 0, -4]);
+}
+
+function createIndices() {
+  var indices = [
+    0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5, 4, 5, 6, 5, 6, 7, 6, 7, 0, 7, 0, 1, 0,
+    2, 6, 2, 6, 4, 1, 3, 7, 3, 7, 5,
+  ];
+  indexCount = indices.length;
+
+  var indexBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+  gl.bufferData(
+    gl.ELEMENT_ARRAY_BUFFER,
+    new Uint8Array(indices),
+    gl.STATIC_DRAW
+  );
 }
 
 function draw() {
@@ -105,7 +162,8 @@ function draw() {
   gl.uniformMatrix4fv(transformMatrix, false, matrix);
 
   gl.clear(gl.COLOR_BUFFER_BIT);
-  gl.drawArrays(gl.TRIANGLE_FAN, 0, vertexCount);
+  //   gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertexCount);
+  gl.drawElements(gl.TRIANGLES, indexCount, gl.UNSIGNED_BYTE, 0);
   requestAnimationFrame(draw);
 }
 
